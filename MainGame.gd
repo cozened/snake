@@ -17,7 +17,17 @@ func place_apple():
 	randomize()
 	var x = randi() % 20
 	var y = randi() % 20
+	var randomVector = Vector2(x,y)
+	
+	if is_with_in_snake_body(randomVector):
+		return place_apple()
 	return Vector2(x,y)
+
+func is_with_in_snake_body(location:Vector2):
+	for block in snake_body.slice(1,snake_body.size() - 1):
+		if block == location:
+			return true
+	return false
 
 func draw_apple():
 	$SnakeApple.set_cell(apple_pos.x,apple_pos.y,APPLE)
@@ -64,9 +74,6 @@ func draw_snake():
 					$SnakeApple.set_cell(block.x,block.y,SNAKE,false,true,false,Vector2(5,0)	)	
 				if previous_block.x == 1 and next_block.y == 1 or next_block.x == 1 and previous_block.y == 1:
 					$SnakeApple.set_cell(block.x,block.y,SNAKE,false,false,false,Vector2(5,0)	)	
-			
-
-		
 		
 func relation2(first_block:Vector2,second_block:Vector2):
 	var block_relation = second_block - first_block
@@ -77,42 +84,54 @@ func relation2(first_block:Vector2,second_block:Vector2):
 	
 		
 func move_snake():
-	if add_apple:
-		delete_tiles(SNAKE)
-		var body_copy = snake_body.slice(0,snake_body.size() - 1)
-		var new_head = body_copy[0] + snake_direction
-		body_copy.insert(0,new_head)
-		snake_body = body_copy
-		add_apple = false
-	else:
-		delete_tiles(SNAKE)
-		var body_copy = snake_body.slice(0,snake_body.size() - 2)
-		var new_head = body_copy[0] + snake_direction
-		body_copy.insert(0,new_head)
-		snake_body = body_copy
+	delete_tiles(SNAKE)
+	move_snake_logic(add_apple)
+	add_apple = false
+			
+func move_snake_logic(should_add_length:bool):
+	var index_offset = 2
+	if should_add_length:
+		index_offset = 1
+		
+	var body_copy = snake_body.slice(0,snake_body.size() - index_offset)
+	var new_head = body_copy[0] + snake_direction
+		
+	##snake goes off screen, make it loop
+	new_head.x = loop_value(new_head.x)
+	new_head.y = loop_value(new_head.y)
 
+	body_copy.insert(0,new_head)
+	snake_body = body_copy
 
+func loop_value(value:int):
+	if value > 19:
+		return 0
+	if value < 0:
+		return 20
+		
+	return value
+		
 	
 func check_apple_eaten():
 	if apple_pos == snake_body[0]:
 		apple_pos = place_apple()
 		add_apple = true
-		get_tree().call_group('ScoreGroup','update_score',snake_body.size())
+		update_score()
 		
+func update_score():
+	get_tree().call_group('ScoreGroup','update_score',snake_body.size())
+	
 func check_game_over():
 	var head = snake_body[0]
-	#snake leaves the screen
-	#if head.x > 20 or head.x < 0 or head.y < 0 or head.y > 20:
-	#	reset()
 	#snake bites it owns tail
-	for block in snake_body.slice(1,snake_body.size() - 1):
-		if block == head:
-			reset()
+	if is_with_in_snake_body(head):
+		reset()
+	
 	
 func reset():
 	snake_body = [Vector2(5,10),Vector2(4,10),Vector2(3,10)]
 	snake_direction = Vector2(1,0)
-	
+	update_score()
 	
 func _input(event):
 	if Input.is_action_just_pressed("ui_up"):

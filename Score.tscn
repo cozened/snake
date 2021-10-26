@@ -8,7 +8,8 @@
 script = ExtResource( 1 )
 
 [node name="HighScore" type="Label" parent="."]
-margin_right = 64.0
+margin_left = 0.889
+margin_right = 68.889
 margin_bottom = 14.0
 custom_colors/font_color = Color( 0.219608, 0.282353, 0.0470588, 1 )
 text = "Highscore:"
@@ -17,8 +18,8 @@ __meta__ = {
 }
 
 [node name="ScoreText" type="Label" parent="."]
-margin_left = 70.0
-margin_right = 155.0
+margin_left = 71.0
+margin_right = 156.0
 margin_bottom = 14.0
 custom_colors/font_color = Color( 0.219608, 0.282353, 0.0470588, 1 )
 text = "0"

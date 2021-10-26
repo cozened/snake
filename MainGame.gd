@@ -119,19 +119,26 @@ func check_apple_eaten():
 		update_score()
 		
 func update_score():
-	get_tree().call_group('ScoreGroup','update_score',snake_body.size())
-	
+	get_tree().call_group('ScoreGroup','update_score',get_highscore())
+
+func get_highscore():
+	return snake_body.size()
+		
 func check_game_over():
 	var head = snake_body[0]
 	#snake bites it owns tail
 	if is_with_in_snake_body(head):
-		reset()
+		#game is over
+		$SnakeTick.stop()
+		$GameOverDialog.dialog_text = "Highscore: " + str(get_highscore())
+		$GameOverDialog.show()
 	
 	
 func reset():
 	snake_body = [Vector2(5,10),Vector2(4,10),Vector2(3,10)]
 	snake_direction = Vector2(1,0)
 	update_score()
+	$SnakeTick.start()
 	
 func _input(event):
 	if Input.is_action_just_pressed("ui_up"):
@@ -161,4 +168,6 @@ func _on_SnakeTick_timeout():
 	
 func _process(delta):
 	check_game_over()
-	
+
+func _on_GameOverDialog_confirmed():
+	reset()
